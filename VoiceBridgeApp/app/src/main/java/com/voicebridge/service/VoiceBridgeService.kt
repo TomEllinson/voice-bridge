@@ -73,9 +73,28 @@ class VoiceBridgeService : Service() {
     private var vad: VoiceActivityDetector? = null
     private var currentMode: RecordingMode = RecordingMode.ALWAYS_LISTENING
 
-    // State callbacks for UI
+    // State callbacks for UI (legacy support)
     var onStatusUpdate: ((String) -> Unit)? = null
     var onConnectionStateChange: ((Boolean) -> Unit)? = null
+
+    // StateFlows for ViewModel
+    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    val connectionState: StateFlow<ConnectionState> = _connectionState
+
+    private val _isListening = MutableStateFlow(false)
+    val isListening: StateFlow<Boolean> = _isListening
+
+    private val _isSpeaking = MutableStateFlow(false)
+    val isSpeaking: StateFlow<Boolean> = _isSpeaking
+
+    private val _conversationMode = MutableStateFlow(ConversationMode.PUSH_TO_TALK)
+    val conversationMode: StateFlow<ConversationMode> = _conversationMode
+
+    private val _transcription = MutableStateFlow("")
+    val transcription: StateFlow<String> = _transcription
+
+    private val _agentResponse = MutableStateFlow("")
+    val agentResponse: StateFlow<String> = _agentResponse
 
     // Reconnection
     private var reconnectJob: Job? = null
@@ -150,11 +169,13 @@ class VoiceBridgeService : Service() {
         // Security: Only allow Tailscale IPs
         if (!isTailscaleIp(serverIp)) {
             updateStatus("Error: Only Tailscale IPs (100.x.x.x) allowed")
+            _connectionState.value = ConnectionState.Error("Only Tailscale IPs allowed")
             return
         }
 
         serverAddress = serverIp
         serverPort = port
+        _connectionState.value = ConnectionState.Connecting
 
         serviceScope.launch {
             try {
@@ -168,6 +189,7 @@ class VoiceBridgeService : Service() {
                             Log.d(TAG, "WebSocket connected")
                             updateStatus("Connected to $serverIp")
                             onConnectionStateChange?.invoke(true)
+                            _connectionState.value = ConnectionState.Connected
                             updateNotification("Connected - Listening...")
 
                             // Start recording if in always-listening mode
@@ -179,6 +201,7 @@ class VoiceBridgeService : Service() {
                         override fun onDisconnected() {
                             Log.d(TAG, "WebSocket disconnected")
                             onConnectionStateChange?.invoke(false)
+                            _connectionState.value = ConnectionState.Disconnected
                             updateStatus("Disconnected")
                             updateNotification("Disconnected")
                             stopRecording()
@@ -198,6 +221,7 @@ class VoiceBridgeService : Service() {
                             Log.e(TAG, "WebSocket error: $error")
                             updateStatus("Error: $error")
                             onConnectionStateChange?.invoke(false)
+                            _connectionState.value = ConnectionState.Error(error)
                         }
                     }
                 )
@@ -207,6 +231,7 @@ class VoiceBridgeService : Service() {
                 Log.e(TAG, "Connection failed", e)
                 updateStatus("Connection failed: ${e.message}")
                 onConnectionStateChange?.invoke(false)
+                _connectionState.value = ConnectionState.Error(e.message ?: "Connection failed")
             }
         }
     }
@@ -226,6 +251,11 @@ class VoiceBridgeService : Service() {
         if (isRecording.get()) return
 
         currentMode = mode
+        _conversationMode.value = when(mode) {
+            RecordingMode.PUSH_TO_TALK -> ConversationMode.PUSH_TO_TALK
+            RecordingMode.VOICE_ACTIVATED -> ConversationMode.VOICE_ACTIVATED
+            RecordingMode.ALWAYS_LISTENING -> ConversationMode.ALWAYS_LISTENING
+        }
 
         serviceScope.launch(Dispatchers.IO) {
             try {
@@ -244,6 +274,7 @@ class VoiceBridgeService : Service() {
                 }
 
                 isRecording.set(true)
+                _isListening.value = true
                 audioRecord?.startRecording()
                 updateStatus("Recording started (${mode.name})")
                 updateNotification("Listening...")
@@ -429,5 +460,47 @@ class VoiceBridgeService : Service() {
         ALWAYS_LISTENING,
         VOICE_ACTIVATED,
         PUSH_TO_TALK
+    }
+
+    // Sealed class for connection state (used by ViewModel)
+    sealed class ConnectionState {
+        object Disconnected : ConnectionState()
+        object Connecting : ConnectionState()
+        object Connected : ConnectionState()
+        data class Error(val message: String) : ConnectionState()
+    }
+
+    // Conversation mode (used by ViewModel)
+    enum class ConversationMode {
+        PUSH_TO_TALK,
+        VOICE_ACTIVATED,
+        ALWAYS_LISTENING
+    }
+
+    // Methods expected by ViewModel
+    fun connect(address: String) {
+        val parts = address.split(":")
+        val ip = parts[0]
+        val port = parts.getOrNull(1)?.toIntOrNull() ?: 8765
+        connectToServer(ip, port)
+    }
+
+    fun startPushToTalk() {
+        startRecording(RecordingMode.PUSH_TO_TALK)
+    }
+
+    fun stopPushToTalk() {
+        stopRecording()
+    }
+
+    fun toggleConversationMode() {
+        val modes = ConversationMode.values()
+        val currentIndex = modes.indexOf(_conversationMode.value)
+        val nextIndex = (currentIndex + 1) % modes.size
+        _conversationMode.value = modes[nextIndex]
+    }
+
+    fun interruptPlayback() {
+        handleInterruption()
     }
 }

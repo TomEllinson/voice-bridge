@@ -251,6 +251,12 @@ class VoiceBridgeService : Service() {
         if (isRecording.get()) return
 
         currentMode = mode
+        _isListening.value = true
+        _conversationMode.value = when(mode) {
+            RecordingMode.PUSH_TO_TALK -> ConversationMode.PUSH_TO_TALK
+            RecordingMode.VOICE_ACTIVATED -> ConversationMode.VOICE_ACTIVATED
+            RecordingMode.ALWAYS_LISTENING -> ConversationMode.ALWAYS_LISTENING
+        }
         _conversationMode.value = when(mode) {
             RecordingMode.PUSH_TO_TALK -> ConversationMode.PUSH_TO_TALK
             RecordingMode.VOICE_ACTIVATED -> ConversationMode.VOICE_ACTIVATED

@@ -215,9 +215,20 @@ VoiceBridgeApp/
 
 ---
 
-## Notes
-- Phase 1 complete: All core modules working and tested
-- Latency optimization available via warm_start.py
-- Phase 2 Android app work begins now
-- Building standalone voice bridge module that can integrate with OpenClaw
-- Focus on minimal latency voice-in/voice-out loop
+## Phase Summary
+
+### Phase 1: Complete ✓
+All core modules working and tested (transcription, TTS, pipeline, Matrix integration)
+
+### Phase 2: Complete ✓ (2026-03-25)
+Android app fully implemented:
+- Kotlin/Jetpack Compose UI with Material3
+- Foreground service with notification
+- WebSocket streaming with Tailscale-only security
+- VAD (Silero/WebRTC) and interruption handling
+- 3 listening modes: Always-Listening, Voice-Activated, Push-to-Talk
+
+### Phase 3: Next
+- Build APK and test end-to-end
+- Bluetooth headset support
+- Prosody detection and multiple personas

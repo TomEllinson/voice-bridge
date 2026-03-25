@@ -228,7 +228,15 @@ Android app fully implemented:
 - VAD (Silero/WebRTC) and interruption handling
 - 3 listening modes: Always-Listening, Voice-Activated, Push-to-Talk
 
-### Phase 3: Next
-- Build APK and test end-to-end
-- Bluetooth headset support
-- Prosody detection and multiple personas
+### Phase 3: Next (Ready to Start)
+1. **Build Android APK** - Run `./gradlew assembleDebug` in VoiceBridgeApp/
+2. **Test WebSocket end-to-end** - Start server, connect app, verify audio streaming
+3. **Add Bluetooth headset support** - Audio routing to BT headset for hands-free
+4. **Performance optimization** - Buffer tuning, latency measurement, CPU profiling
+5. **Advanced features**: Prosody detection, multiple voice personas, barge-in accuracy
+
+## Next Action for Job Queue
+**Phase**: 3
+**Next Action**: Complete Phase 3: Build Android APK, test WebSocket end-to-end communication between Android app and Python backend, add Bluetooth headset audio routing support, implement performance optimizations (buffer tuning, latency reduction), and add advanced features including prosody detection for emotional tone recognition, multiple voice personas, and improved barge-in detection accuracy.
+**Status**: ready
+**Model**: ollama/kimi-k2.5:cloud

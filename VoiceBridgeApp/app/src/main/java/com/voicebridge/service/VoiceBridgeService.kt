@@ -324,6 +324,7 @@ class VoiceBridgeService : Service() {
 
     fun stopRecording() {
         isRecording.set(false)
+        _isListening.value = false
         try {
             audioRecord?.stop()
             audioRecord?.release()

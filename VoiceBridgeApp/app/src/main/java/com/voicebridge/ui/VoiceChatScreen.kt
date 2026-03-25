@@ -375,15 +375,27 @@ fun RecordingControls(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isPushToTalk) {
-                // Push to talk button
+                // Push to talk button with press detection
+                var isPressed by remember { mutableStateOf(false) }
+
                 Button(
-                    onPressed = { if (!isRecording) onStartRecording() },
-                    onClick = { if (isRecording) onStopRecording() },
+                    onClick = {},
                     modifier = Modifier
-                        .size(120.dp),
+                        .size(120.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    isPressed = true
+                                    if (!isRecording) onStartRecording()
+                                    tryAwaitRelease()
+                                    isPressed = false
+                                    if (isRecording) onStopRecording()
+                                }
+                            )
+                        },
                     shape = RoundedCornerShape(60.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRecording)
+                        containerColor = if (isRecording || isPressed)
                             MaterialTheme.colorScheme.error
                         else
                             MaterialTheme.colorScheme.primary

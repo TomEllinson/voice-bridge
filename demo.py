@@ -28,7 +28,7 @@ def demo_transcribe(audio_path: str, model_size: str = "base"):
     from transcription import WhisperTranscriber
 
     logger.info(f"Loading Whisper model: {model_size}")
-    transcriber = WhisperTranscriber(model_size=model_size)
+    transcriber = WhisperTranscriber(model_size=model_size, device="cpu", compute_type="int8")
 
     logger.info(f"Transcribing: {audio_path}")
     start_time = time.time()
@@ -100,7 +100,7 @@ def demo_pipeline(audio_path: str, model_size: str = "base", tts_engine: str = "
 
     # Step 1: Transcribe
     logger.info("\n[1/3] Transcribing audio...")
-    transcriber = WhisperTranscriber(model_size=model_size)
+    transcriber = WhisperTranscriber(model_size=model_size, device="cpu", compute_type="int8")
 
     try:
         result = transcriber.transcribe(audio_path)

@@ -63,8 +63,8 @@ class KokoroTTS(TTSEngine):
                 from kokoro import KPipeline
                 import torch
 
-                # Determine device
-                device = "cuda" if torch.cuda.is_available() else "cpu"
+                # Use CPU for compatibility (CUDA capability issues on some GPUs)
+                device = "cpu"
                 logger.info(f"Loading Kokoro TTS on {device}")
 
                 self._pipeline = KPipeline(lang_code='a', device=device)

@@ -86,6 +86,16 @@ A voice interface for OpenClaw enabling real-time audio conversations. Two-phase
 4. **Response Generation**: TTS with voice selection
 5. **Output**: Audio playback with interruption monitoring
 
+## Security & Network Constraints
+**CRITICAL: Tailscale-Only Networking**
+- Android app MUST only communicate over Tailscale (100.x.x.x addresses)
+- WebSocket server binds to Tailscale IP only (not 0.0.0.0)
+- No public internet exposure — all traffic through encrypted Tailscale mesh
+- Certificate pinning for Tailscale IPs
+- Fail-closed: If Tailscale not connected, app refuses to function
+
+**Rationale:** Voice contains sensitive personal data. No cloud services, no public endpoints, only device-to-device through your private network.
+
 ## Technology Stack
 - **Transcription**: Whisper (local) or Deepgram/AssemblyAI (cloud)
 - **TTS**: Kokoro-TTS, Piper, or ElevenLabs

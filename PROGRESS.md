@@ -89,19 +89,30 @@ Created `warm_start.py` to pre-load models:
 - `interruption_handler.py` - Turn-taking logic
 
 ### Completed
-- [ ] None yet - Phase 2 starting
+- [x] Android project structure (`VoiceBridgeApp/`)
+- [x] Kotlin project with Jetpack Compose
+- [x] MainActivity with permission handling and service binding
+- [x] VoiceBridgeService with foreground notification
+- [x] WebSocketClient for real-time audio streaming
+- [x] Material3 theme and UI components
+- [x] Resource files (strings, colors, themes)
+- [x] WebSocket server backend (`websocket_server.py`)
+- [x] VAD module (`vad_module.py`)
+- [x] Interruption handler (`interruption_handler.py`)
 
 ### In Progress
-- [ ] Initialize Android project structure (`VoiceBridgeApp/`)
+- [ ] Android UI screens (VoiceChatScreen.kt, VoiceChatViewModel.kt)
+- [ ] Complete service implementation with LocalBinder
+- [ ] Audio recording and playback in service
+- [ ] Integration testing
 
 ### Next Steps
-1. Initialize Android project structure (`VoiceBridgeApp/`)
-2. Set up Kotlin project with Jetpack Compose
-3. Implement WebSocket client for real-time audio streaming
-4. Add voice activity detection (VAD) module
-5. Create basic UI for push-to-talk and always-listening modes
-6. Implement interruption handling logic
-7. Add background service with notification support
+1. Complete VoiceChatScreen UI implementation
+2. Add ViewModel for state management
+3. Implement audio capture with proper buffering
+4. Add voice activity detection integration
+5. Test WebSocket communication
+6. Add Bluetooth headset support
 
 ---
 

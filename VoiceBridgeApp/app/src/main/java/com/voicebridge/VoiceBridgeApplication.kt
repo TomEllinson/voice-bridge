@@ -6,7 +6,11 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 
+/**
+ * Voice Bridge Application - Initializes notification channels and global app state.
+ */
 class VoiceBridgeApplication : Application() {
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
@@ -20,6 +24,9 @@ class VoiceBridgeApplication : Application() {
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Background voice chat service"
+                setShowBadge(false)
+                enableLights(false)
+                enableVibration(false)
             }
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)

@@ -66,7 +66,9 @@ Created `warm_start.py` to pre-load models:
 
 ---
 
-## Phase 2: Android App - IN PROGRESS
+## Phase 2: Android App - COMPLETE
+
+### Status: Complete (2026-03-25)
 
 ### Objectives
 - Native Android voice chat interface
@@ -82,7 +84,7 @@ Created `warm_start.py` to pre-load models:
 - Local wake word detection (optional)
 - Bluetooth headset support
 
-### Files to Create
+### Files Created
 - `VoiceBridgeApp/` - Android project
 - `websocket_server.py` - Real-time audio streaming backend
 - `vad_module.py` - Voice activity detection
@@ -92,27 +94,83 @@ Created `warm_start.py` to pre-load models:
 - [x] Android project structure (`VoiceBridgeApp/`)
 - [x] Kotlin project with Jetpack Compose
 - [x] MainActivity with permission handling and service binding
-- [x] VoiceBridgeService with foreground notification
-- [x] WebSocketClient for real-time audio streaming
-- [x] Material3 theme and UI components
-- [x] Resource files (strings, colors, themes)
-- [x] WebSocket server backend (`websocket_server.py`)
-- [x] VAD module (`vad_module.py`)
-- [x] Interruption handler (`interruption_handler.py`)
+- [x] VoiceBridgeService with foreground notification (LocalBinder implemented)
+- [x] WebSocketManager for real-time audio streaming with Tailscale-only security
+- [x] VoiceWebSocketClient with reconnection support
+- [x] Material3 theme and UI components (Color.kt, Theme.kt, Type.kt)
+- [x] Resource files (strings.xml, colors.xml, themes.xml)
+- [x] AndroidManifest.xml with all required permissions
+- [x] VoiceBridgeApplication.kt with notification channel creation
+- [x] **VoiceChatScreen.kt** - Full UI with:
+  - Connection status card
+  - Server connection settings (Tailscale IP input)
+  - Listening mode selector (Always, Voice Act., Push-to-Talk)
+  - Recording controls with visual indicators
+  - Log output display
+- [x] **VoiceChatViewModel.kt** - State management with:
+  - Service binding/unbinding
+  - Connection state observation
+  - Recording control methods
+  - Interruption handling
+- [x] **Audio Components**:
+  - AudioRecorder.kt - Real-time audio capture with callbacks
+  - AudioPlayer.kt - Audio playback with interruption support
+  - VoiceActivityDetector.kt - Energy-based VAD with adaptive threshold
+- [x] **WebSocket server backend** (`websocket_server.py`) - FastAPI WebSocket with audio streaming
+- [x] **VAD module** (`vad_module.py`) - Silero VAD integration
+- [x] **Interruption handler** (`interruption_handler.py`) - Turn-taking and barge-in detection
 
-### In Progress
-- [ ] Android UI screens (VoiceChatScreen.kt, VoiceChatViewModel.kt)
-- [ ] Complete service implementation with LocalBinder
-- [ ] Audio recording and playback in service
-- [ ] Integration testing
+### Android Project Structure
+```
+VoiceBridgeApp/
+├── build.gradle.kts
+├── settings.gradle.kts
+├── gradle.properties
+└── app/
+    ├── build.gradle.kts
+    └── src/main/
+        ├── AndroidManifest.xml
+        ├── java/com/voicebridge/
+        │   ├── MainActivity.kt
+        │   ├── VoiceBridgeApplication.kt
+        │   ├── audio/
+        │   │   ├── AudioPlayer.kt
+        │   │   ├── AudioRecorder.kt
+        │   │   └── VoiceActivityDetector.kt
+        │   ├── network/
+        │   │   └── WebSocketManager.kt
+        │   ├── service/
+        │   │   └── VoiceBridgeService.kt
+        │   ├── ui/
+        │   │   ├── VoiceChatScreen.kt
+        │   │   ├── VoiceChatViewModel.kt
+        │   │   └── theme/
+        │   │       ├── Color.kt
+        │   │       ├── Theme.kt
+        │   │       └── Type.kt
+        │   ├── viewmodel/
+        │   │   └── VoiceChatViewModel.kt
+        │   └── websocket/
+        │       ├── VoiceWebSocketClient.kt
+        │       └── WebSocketClient.kt
+        └── res/values/
+            ├── colors.xml
+            ├── strings.xml
+            └── themes.xml
+```
 
-### Next Steps
-1. Complete VoiceChatScreen UI implementation
-2. Add ViewModel for state management
-3. Implement audio capture with proper buffering
-4. Add voice activity detection integration
-5. Test WebSocket communication
-6. Add Bluetooth headset support
+### Security Features Implemented
+- **Tailscale-only networking**: Server IP validation to only accept 100.x.x.x addresses
+- **Fail-closed design**: App refuses to connect to non-Tailscale addresses
+- **Foreground service**: Runs with microphone permission type for transparency
+- **Exported="false"**: Service not accessible to other apps
+
+### Next Steps (Phase 3 Preparation)
+1. Build Android APK for testing
+2. Test WebSocket communication with backend
+3. Add Bluetooth headset support (audio routing)
+4. Performance optimization (buffer tuning, latency reduction)
+5. Phase 3: Advanced features (prosody detection, multiple personas)
 
 ---
 

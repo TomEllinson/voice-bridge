@@ -76,16 +76,49 @@ python matrix_voice_bridge.py \
 
 ## Testing
 
+### Unit Tests
+
 ```bash
 # Run unit tests
 python test_voice_bridge.py
 
-# Test with sample audio
-python -c "
+# Verify all modules import
+python verify.py
+```
+
+### Demo Scripts
+
+The `demo.py` script provides comprehensive testing without needing Matrix credentials:
+
+```bash
+# Test transcription on an audio file
+python demo.py transcribe audio.ogg --model base
+
+# Test TTS synthesis
+python demo.py tts "Hello, this is a test"
+python demo.py tts "Hello" --engine piper
+
+# Test full voice-in/voice-out pipeline
+python demo.py pipeline audio.ogg --model base --tts-engine kokoro
+
+# Test session management
+python demo.py session
+
+# Test Matrix connection (requires credentials)
+python demo.py matrix
+```
+
+### Manual Testing
+
+```python
+# Test transcription
 from transcription import transcribe_audio
 text = transcribe_audio('test_audio.ogg')
 print(f'Transcription: {text}')
-"
+
+# Test TTS
+from tts_engine import speak
+audio = speak("Hello from Voice Bridge!")
 ```
 
 ## Modules

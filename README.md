@@ -160,6 +160,49 @@ context = session.get_context()  # Last N messages for OpenClaw
 ### `matrix_voice_bridge.py`
 Main entry point - handles Matrix events, orchestrates transcription/TTS, manages sessions.
 
+### `openclaw_integration.py`
+OpenClaw Matrix Provider Integration Adapter. Provides a clean plugin interface for integrating with existing OpenClaw Matrix providers.
+
+## OpenClaw Integration
+
+To integrate Voice Bridge with an existing OpenClaw Matrix provider:
+
+```python
+from voice_bridge.openclaw_integration import VoiceBridgePlugin
+
+# In your Matrix provider class:
+async def initialize(self):
+    self.voice_plugin = VoiceBridgePlugin(
+        openclaw_client=self.openclaw,
+        config={
+            'whisper_model': 'base',  # or 'tiny', 'small', 'medium', 'large'
+            'tts_engine': 'kokoro',    # or 'piper', 'pyttsx3'
+            'session_timeout': 3600    # 1 hour
+        }
+    )
+    await self.voice_plugin.initialize()
+
+async def handle_message(self, event, room):
+    if event.content.get('msgtype') in ('m.audio', 'm.voice'):
+        # Download audio function
+        async def download_audio(url):
+            return await self.client.download(url)
+
+        # Handle voice message
+        result = await self.voice_plugin.handle_voice_message(
+            event, room, download_audio
+        )
+
+        if result['success']:
+            # Send audio response back to Matrix
+            await self.send_audio(room.room_id, result['audio_data'])
+            # Send transcription as text for accessibility
+            await self.send_text(
+                room.room_id,
+                f"You said: {result['transcription']}"
+            )
+```
+
 ## Development
 
 ### Adding a New TTS Engine

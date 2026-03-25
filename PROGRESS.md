@@ -17,6 +17,8 @@
 - [x] Created `.env.example` configuration template
 - [x] Created comprehensive `README.md` with usage instructions
 - [x] Created `demo.py` with multiple test commands (transcribe, tts, pipeline, session, matrix)
+- [x] Created `openclaw_integration.py` - plugin adapter for OpenClaw Matrix provider integration
+- [x] Updated README with OpenClaw integration instructions
 
 ### In Progress
 - [ ] Test actual audio transcription with real file (requires sample audio)
@@ -25,7 +27,7 @@
 
 ### Blocked Tools
 - Cannot access `/home/tom/.npm-global` to examine OpenClaw Matrix provider
-- Built standalone implementation that can be integrated with OpenClaw
+- Built standalone voice bridge that can be integrated with OpenClaw via plugin adapter
 
 ### Next Steps
 1. Install dependencies and test actual transcription with sample audio
@@ -33,15 +35,17 @@
 3. Test full voice pipeline with demo.py
 4. Run Matrix integration test with valid credentials
 5. Measure latency to verify under 3 second target
+6. Integrate with OpenClaw Matrix provider using `openclaw_integration.py`
 
 ### Files Created/Modified (2026-03-25)
 - `matrix_voice_bridge.py` - Complete Matrix voice message handler
 - `transcription.py` - Whisper transcription module
 - `tts_engine.py` - Text-to-speech engine with Kokoro/Piper/pyttsx3
 - `voice_session.py` - Session management and conversation context
+- `openclaw_integration.py` - Plugin adapter for OpenClaw integration
 - `requirements.txt` - All dependencies
 - `.env.example` - Configuration template
-- `README.md` - Full documentation with examples
+- `README.md` - Full documentation with examples and integration guide
 - `demo.py` - Demo script for testing all components
 - `test_voice_bridge.py` - Unit tests
 
@@ -53,4 +57,5 @@
 - Using available Whisper packages for transcription
 - TTS: Kokoro recommended (fast, local), Piper as fallback, pyttsx3 last resort
 - All core Phase 1 modules are complete and import successfully
+- Integration module (`openclaw_integration.py`) provides clean plugin interface
 - Ready for integration testing with actual audio and Matrix server

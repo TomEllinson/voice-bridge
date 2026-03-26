@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat
 import com.voicebridge.MainActivity
 import com.voicebridge.R
 import com.voicebridge.audio.VoiceActivityDetector
+import com.voicebridge.audio.BluetoothAudioManager
 import com.voicebridge.network.WebSocketManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +64,9 @@ class VoiceBridgeService : Service() {
     // WebSocket connection
     private var webSocketManager: WebSocketManager? = null
 
+    // Bluetooth audio management
+    private lateinit var bluetoothAudioManager: BluetoothAudioManager
+
     // Audio components
     private var audioRecord: AudioRecord? = null
     private var mediaPlayer: MediaPlayer? = null
@@ -105,6 +109,23 @@ class VoiceBridgeService : Service() {
         super.onCreate()
         Log.d(TAG, "Service created")
         initializeVAD()
+        initializeBluetooth()
+    }
+
+    private fun initializeBluetooth() {
+        bluetoothAudioManager = BluetoothAudioManager(this)
+        bluetoothAudioManager.initialize()
+
+        // Monitor Bluetooth state
+        serviceScope.launch {
+            bluetoothAudioManager.isBluetoothConnected.collect { connected ->
+                if (connected) {
+                    updateStatus("Bluetooth headset connected")
+                } else {
+                    updateStatus("Bluetooth headset disconnected")
+                }
+            }
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
@@ -265,8 +286,13 @@ class VoiceBridgeService : Service() {
 
         serviceScope.launch(Dispatchers.IO) {
             try {
+                // Start Bluetooth SCO audio if headset is connected
+                if (::bluetoothAudioManager.isInitialized) {
+                    bluetoothAudioManager.startScoAudio()
+                }
+
                 audioRecord = AudioRecord(
-                    MediaRecorder.AudioSource.MIC,
+                    bluetoothAudioManager.getAudioSource(),
                     SAMPLE_RATE,
                     CHANNEL_CONFIG,
                     AUDIO_FORMAT,
@@ -332,6 +358,12 @@ class VoiceBridgeService : Service() {
             Log.e(TAG, "Error stopping recording", e)
         }
         audioRecord = null
+
+        // Stop Bluetooth SCO audio
+        if (::bluetoothAudioManager.isInitialized) {
+            bluetoothAudioManager.stopScoAudio()
+        }
+
         updateStatus("Recording stopped")
         updateNotification("Connected - Idle")
     }

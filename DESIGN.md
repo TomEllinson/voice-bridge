@@ -8,116 +8,130 @@
 - **Estimated Scope:** large (weeks)
 
 ## Summary
-A voice interface for OpenClaw enabling real-time audio conversations. Two-phase approach: (1) Matrix audio clip exchange for baseline functionality, (2) Android app for seamless mobile voice interaction with interruption detection and turn-taking.
+A **standalone voice chat app for OpenClaw** that operates exclusively over Tailscale. **NOT a Matrix integration** — this is a separate, self-contained voice communication system. All traffic stays within your Tailscale network (100.x.x.x), providing end-to-end encryption via Tailscale's mesh network.
 
-## Goals
-1. Enable voice input/output for OpenClaw conversations
-2. Support hands-free operation during physical activities (driving, walking)
-3. Implement natural conversation flow with interruption detection
-4. Maintain OpenClaw's autonomous agent capabilities via voice
-5. Create seamless mobile experience for supervision-on-the-go
+## Architecture: Tailscale-Only Voice Mesh
 
-## Phase 1: Matrix Audio Baseline
-### Objectives
-- Receive voice messages from Matrix/Element
-- Transcribe audio to text (local Whisper or API)
-- Send succinct audio responses back to Matrix
-- Maintain conversation context across audio/text
+### Security Model
+- **NO public endpoints** — App refuses to connect to non-Tailscale IPs
+- **NO cloud services** — All traffic device-to-device via Tailscale
+- **Tailscale IPs only** — 100.64.0.0/10 range enforced
+- **Fail-closed** — If Tailscale disconnected, app shows "No Tailscale Connection"
+- **E2E encryption** — Provided by Tailscale WireGuard mesh
 
-### Technical Approach
-- Matrix bot extension for voice message handling
-- Local Whisper integration for transcription (privacy, offline)
-- TTS for responses (Kokoro, Piper, or cloud)
-- Audio file management (cleanup, compression)
-
-### Files to Create
-- `matrix_voice_bridge.py` - Voice message handler
-- `transcription.py` - Whisper integration
-- `tts_engine.py` - Text-to-speech
-- `voice_session.py` - Conversation state management
-
-## Phase 2: Android App
-### Objectives
-- Native Android voice chat interface
-- Real-time streaming (not clip-based)
-- Push-to-talk or always-listening modes
-- Background operation with notification
-- Interruption detection and handling
-
-### Technical Approach
-- Kotlin/Android native app
-- WebSocket connection to OpenClaw gateway
-- Audio streaming with VAD (voice activity detection)
-- Local wake word detection (optional)
-- Bluetooth headset support
-
-### Files to Create
-- `VoiceBridgeApp/` - Android project
-- `websocket_server.py` - Real-time audio streaming backend
-- `vad_module.py` - Voice activity detection
-- `interruption_handler.py` - Turn-taking logic
-
-## Phase 3: Advanced Features
-### Objectives
-- Interruption-aware responses (Claude/Grok style)
-- Prosody detection (emotional tone)
-- Multiple voice personas
-- Conversation memory optimization for voice
-
-### Key Features
-- Barge-in detection (user speaks while agent speaking)
-- Adaptive response length based on context
-- Voice activity profiling
-- Background noise filtering
-
-## Architecture
-
-### Voice Pipeline
+### Network Flow
 ```
-[Android Mic] → [VAD] → [Stream] → [Whisper] → [OpenClaw] → [TTS] → [Speaker]
-                ↓                           ↓
-         [Wake Word]                   [Interruption Detection]
+[Android Phone] ←Tailscale→ [MARDA-BRAIN:8765] ←→ [OpenClaw Agent]
+     (mic/speaker)    (encrypted)     (voice processing)
 ```
 
 ### Components
-1. **Audio Ingestion**: Capture, VAD, streaming
-2. **Transcription**: Real-time Whisper or API
-3. **Agent Processing**: Standard OpenClaw agent loop
-4. **Response Generation**: TTS with voice selection
-5. **Output**: Audio playback with interruption monitoring
 
-## Security & Network Constraints
-**CRITICAL: Tailscale-Only Networking**
-- Android app MUST only communicate over Tailscale (100.x.x.x addresses)
-- WebSocket server binds to Tailscale IP only (not 0.0.0.0)
-- No public internet exposure — all traffic through encrypted Tailscale mesh
-- Certificate pinning for Tailscale IPs
-- Fail-closed: If Tailscale not connected, app refuses to function
+#### 1. Android App (Kotlin/Jetpack Compose)
+- **UI:** Simple voice chat interface (push-to-talk or always-listening)
+- **Audio:** AudioRecord/AudioTrack for native audio
+- **Network:** WebSocket client connecting to Tailscale IP only
+- **Permissions:** Microphone, Bluetooth headset, foreground service
 
-**Rationale:** Voice contains sensitive personal data. No cloud services, no public endpoints, only device-to-device through your private network.
+#### 2. WebSocket Server (Python/FastAPI)
+- **Bind:** Tailscale IP only (100.x.x.x:8765)
+- **Audio Pipeline:** 
+  - Receive audio stream → Whisper transcription
+  - Send to OpenClaw → Get response
+  - TTS (Kokoro) → Stream audio back
+- **Security:** Reject connections from non-Tailscale IPs
+
+#### 3. OpenClaw Integration
+- Receives transcribed text from voice bridge
+- Processes normally
+- Returns response via TTS
+
+## Phase 1: Android Developer Agent
+**Goal:** Create an agent that can develop Android apps
+
+### Agent Capabilities
+- Write Kotlin code for Android
+- Use Jetpack Compose for UI
+- Manage Gradle builds
+- Handle Android permissions
+- Build and test APKs
+- Debug Android apps
+
+### Files to Create
+- `agents/android_dev.py` — Android development agent
+- `AGENTS.md` — Android dev agent instructions
+
+## Phase 2: WebSocket Server
+**Goal:** Build backend that only accepts Tailscale connections
+
+### Implementation
+- FastAPI WebSocket server
+- IP whitelist: 100.64.0.0/10 (Tailscale)
+- Reject all other IPs with error
+- Audio streaming with VAD (Silero)
+
+### Files to Create
+- `server/websocket_server.py` — Tailscale-only WebSocket
+- `server/audio_pipeline.py` — Whisper → OpenClaw → TTS
+- `server/tailscale_guard.py` — IP enforcement
+
+## Phase 3: Android App
+**Goal:** Native Android app that connects to Tailscale server
+
+### Implementation
+- Kotlin/Jetpack Compose
+- Foreground service for persistent connection
+- WebSocket client (using OkHttp)
+- AudioRecord/AudioTrack for audio
+- Push-to-talk or voice-activated (configurable)
+
+### Files to Create
+- `android/VoiceBridgeApp/` — Full Android project
+- `android/app/src/...` — Kotlin source files
+- `android/app/build.gradle.kts` — Dependencies
+
+## Phase 4: Integration & Testing
+**Goal:** Full end-to-end voice chat
+
+### Testing Checklist
+- [ ] Android app connects only to 100.x.x.x IPs
+- [ ] WebSocket server rejects non-Tailscale IPs
+- [ ] Audio flows: mic → Android → Server → Whisper → OpenClaw → TTS → Android → speaker
+- [ ] Latency < 3 seconds for simple queries
+- [ ] Works with Bluetooth headset
+- [ ] Background service keeps connection alive
 
 ## Technology Stack
-- **Transcription**: Whisper (local) or Deepgram/AssemblyAI (cloud)
-- **TTS**: Kokoro-TTS, Piper, or ElevenLabs
-- **VAD**: Silero VAD or WebRTC VAD
-- **Android**: Kotlin, Jetpack Compose, WebSocket
-- **Backend**: Python, FastAPI, WebSocket
 
-## Risks & Mitigations
-- **Latency**: Use local Whisper, optimize TTS caching
-- **Battery**: Efficient VAD, background service management
-- **Privacy**: Local transcription preferred, encrypted transport
-- **Interruptions**: Complex state machine, clear turn signaling
+### Android
+- **Language:** Kotlin
+- **UI:** Jetpack Compose
+- **Audio:** AudioRecord, AudioTrack
+- **Networking:** OkHttp WebSocket
+- **Build:** Gradle
+
+### Server
+- **Framework:** FastAPI
+- **WebSocket:** python-socketio or native websockets
+- **Transcription:** faster-whisper (local)
+- **TTS:** kokoro (local)
+- **VAD:** silero-vad
+
+### Security
+- **Network:** Tailscale mesh only
+- **Binding:** 100.x.x.x:8765
+- **Firewall:** Reject non-Tailscale at application level
 
 ## Success Criteria
-- [ ] Can send voice message in Matrix, get voice response
-- [ ] Android app provides hands-free operation
-- [ ] Interruption detection works 90%+ of time
-- [ ] Latency under 3 seconds for simple queries
-- [ ] Works reliably in car/driving scenarios
+- [ ] Android APK builds and installs
+- [ ] App only connects via Tailscale (fails gracefully otherwise)
+- [ ] Voice latency under 3 seconds
+- [ ] Interrupt handling (barge-in detection)
+- [ ] Works while driving (Bluetooth, background service)
+- [ ] Battery efficient (VAD, efficient wake/sleep)
 
-## BMAD Alignment
-- **Self-Documentation**: All decisions in DESIGN.md
-- **Autonomy**: Agent determines when to speak vs text
-- **Quality Gates**: Latency benchmarks, interruption accuracy
-- **Git Hygiene**: Feature branches, meaningful commits
+## Notes
+- **Not Matrix:** This is a standalone app, not a Matrix client
+- **Tailscale is the safety net:** All security comes from Tailscale mesh
+- **Local processing:** Whisper and TTS run on MARDA-BRAIN (not cloud)
+- **Future:** Could add multiple voice channels, group chat, etc.

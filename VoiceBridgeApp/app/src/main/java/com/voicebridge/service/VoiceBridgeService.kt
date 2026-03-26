@@ -493,6 +493,11 @@ class VoiceBridgeService : Service() {
         stopRecording()
         webSocketManager?.disconnect()
         mediaPlayer?.release()
+
+        // Cleanup Bluetooth manager
+        if (::bluetoothAudioManager.isInitialized) {
+            bluetoothAudioManager.cleanup()
+        }
     }
 
     enum class RecordingMode {

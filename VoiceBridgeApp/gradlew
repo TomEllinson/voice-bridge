@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # Copyright © 2015-2021 the original authors.
@@ -226,7 +226,7 @@ fi
 eval "set -- $(
         printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
         xargs -n1 |
-        sed ' s~\\-~\\~g; s~[^-]~\\&~g; ~' \
+        sed ' s~\\-~\\~g; s~[^-]~\\&~g; ' |
         tr '\n' ' '
     )" '"$@"'
 

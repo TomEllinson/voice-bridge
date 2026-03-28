@@ -232,10 +232,8 @@ class VoiceBridgeService : Service() {
                             handleServerMessage(message)
                         }
 
-                        override fun onBinaryMessage(data: ByteBuffer) {
-                            val bytes = ByteArray(data.remaining())
-                            data.get(bytes)
-                            playAudioResponse(bytes)
+                        override fun onBinaryMessage(data: ByteArray) {
+                            playAudioResponse(data)
                         }
 
                         override fun onError(error: String) {

@@ -205,7 +205,7 @@ class VoiceBridgeService : Service() {
                 webSocketManager = WebSocketManager(
                     serverAddress = serverIp,
                     port = port,
-                    listener = object : WebSocketManager.WebSocketListener {
+                    listener = object : WebSocketManager.WebSocketEventListener {
                         override fun onConnected() {
                             Log.d(TAG, "WebSocket connected")
                             updateStatus("Connected to $serverIp")
@@ -448,13 +448,13 @@ class VoiceBridgeService : Service() {
                     prepare()
                     start()
                     setOnCompletionListener {
-                        isPlaying.set(false)
+                        this@VoiceBridgeService.isPlaying.set(false)
                         tempFile.delete()
                         updateStatus("Response complete")
                     }
                     setOnErrorListener { _, what, extra ->
                         Log.e(TAG, "MediaPlayer error: $what, $extra")
-                        isPlaying.set(false)
+                        this@VoiceBridgeService.isPlaying.set(false)
                         tempFile.delete()
                         true
                     }

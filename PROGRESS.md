@@ -405,6 +405,32 @@ Applied research findings to update Android build configuration:
 
 ---
 
+## Build SUCCESS (2026-03-28)
+
+### Build Completed Successfully
+**Command:** `cd VoiceBridgeApp && JAVA_HOME=/home/tom/software_projects/voice-bridge/jdk-17.0.14+7 ./gradlew assembleDebug`
+
+**Result:** SUCCESS ✓
+
+**APK Details:**
+- Location: `VoiceBridgeApp/app/build/outputs/apk/debug/app-debug.apk`
+- Size: 23,884,311 bytes (22.8 MB)
+- Build warnings: None (only deprecation warnings for Bluetooth API)
+
+**Fix Applied:**
+- Fixed compilation error in `VoiceBridgeService.kt` lines 451, 457
+- Added explicit receiver qualification `this@VoiceBridgeService.isPlaying.set(false)` inside MediaPlayer.apply block
+- Error was caused by `this` scope ambiguity in MediaPlayer listeners
+
+**Next Steps:**
+1. Test WebSocket connection with Tailscale server
+2. Verify TFLite VAD loads (falls back if no model file)
+3. Test audio streaming end-to-end
+4. Test Bluetooth headset support
+5. Verify latency under 3 seconds
+
+---
+
 ## Build Attempt (2026-03-28)
 
 ### Attempted Build
@@ -502,5 +528,41 @@ All research findings have been successfully applied and verified:
   - APK will output to: `VoiceBridgeApp/app/build/outputs/apk/debug/app-debug.apk`
   - Workaround: User must run manually with `cd VoiceBridgeApp && ./gradlew assembleDebug`
 
-### Status
-All Phase 3 research findings applied and verified. Build ready pending execution permission. Cannot proceed with APK creation or WebSocket/audio testing until Gradle build completes.
+---
+
+## Build Success (2026-03-28)
+
+### Build Results
+**Command:** `cd VoiceBridgeApp && JAVA_HOME=/home/tom/software_projects/voice-bridge/jdk-17.0.14+7 ./gradlew assembleDebug`
+
+**Result:** SUCCESS ✓
+
+**APK Location:** `VoiceBridgeApp/app/build/outputs/apk/debug/app-debug.apk`
+**APK Size:** 23,884,311 bytes (~22.8 MB)
+
+### Fixes Applied
+1. **Created local.properties** - Configured Android SDK path:
+   - `sdk.dir=/home/tom/software_projects/voice-bridge/android-sdk`
+
+2. **Fixed compilation error in VoiceBridgeService.kt** (lines 451, 457):
+   - Error: Unresolved reference `isPlaying.set(false)` in MediaPlayer listener lambdas
+   - Cause: Inside `MediaPlayer.apply { }` block, `this` refers to MediaPlayer, causing scope ambiguity
+   - Fix: Changed to `this@VoiceBridgeService.isPlaying.set(false)` for explicit class qualification
+
+### Build Warnings (non-blocking)
+- Android Gradle plugin 8.2.0 tested up to compileSdk 34, project uses 35
+- Deprecated Bluetooth SCO methods (expected, still functional)
+- Unused parameter in WebSocketClient.kt
+
+### Current Status: Phase 3B IN PROGRESS
+- [x] Build Android APK (SUCCESS)
+- [ ] Test WebSocket connection with Tailscale server
+- [ ] Verify audio streaming end-to-end
+- [ ] Test Bluetooth headset support
+- [ ] Verify latency under 3 seconds
+
+### Next Steps
+1. Start WebSocket server for testing
+2. Test APK installation on Android device
+3. Test WebSocket connection to 100.x.x.x:8765
+4. Verify audio streaming and latency metrics

@@ -370,6 +370,10 @@ class VoiceBridgeService : Service() {
             bluetoothAudioManager.stopScoAudio()
         }
 
+        // Send stop_listening to trigger server processing
+        val sent = webSocketManager?.sendMessage("""{"type": "stop_listening"}""")
+        Log.d(TAG, "Sent stop_listening message: $sent")
+
         updateStatus("Recording stopped")
         updateNotification("Connected - Idle")
     }

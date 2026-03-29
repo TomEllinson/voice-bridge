@@ -90,7 +90,14 @@ fun VoiceChatScreen(
                 onPortChange = { port = it },
                 isConnected = isConnected,
                 onConnect = {
-                    service()?.connectToServer(serverIp, port.toIntOrNull() ?: 8765)
+                    android.util.Log.d("VoiceChatScreen", "Connect clicked. Service bound: ${isServiceBound()}, Service: ${service() != null}")
+                    if (isServiceBound() && service() != null) {
+                        service()?.connectToServer(serverIp, port.toIntOrNull() ?: 8765)
+                        statusText = "Connecting to $serverIp..."
+                    } else {
+                        statusText = "Error: Service not ready"
+                        logMessages = logMessages + "Service not bound yet"
+                    }
                 },
                 onDisconnect = {
                     service()?.disconnect()

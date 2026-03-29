@@ -121,7 +121,7 @@ class VoiceChatViewModel(application: Application) : AndroidViewModel(applicatio
 
         webSocketManager = WebSocketManager(
             serverAddress = serverAddress,
-            listener = object : WebSocketManager.WebSocketListener {
+            listener = object : WebSocketManager.WebSocketEventListener {
                 override fun onConnected() {
                     viewModelScope.launch {
                         _state.value = _state.value.copy(
@@ -146,9 +146,10 @@ class VoiceChatViewModel(application: Application) : AndroidViewModel(applicatio
                     handleTextMessage(message)
                 }
 
-                override fun onBinaryMessage(data: ByteBuffer) {
+                override fun onBinaryMessage(data: ByteArray) {
                     // Incoming audio from agent
-                    audioPlayer.queueAudio(data)
+                    val buffer = ByteBuffer.wrap(data)
+                    audioPlayer.queueAudio(buffer)
                 }
 
                 override fun onError(error: String) {

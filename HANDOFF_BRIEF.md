@@ -1,8 +1,8 @@
 # Voice Bridge - Handoff Brief
 
 **Date:** 2026-03-29
-**Phase:** 4 COMPLETE ✓
-**Session:** WebSocket Server Verification
+**Phase:** 4 IN PROGRESS
+**Session:** WebSocket Connection Verification
 
 ## Current State
 
@@ -10,6 +10,7 @@
 - **Status:** Running and accepting connections
 - **Address:** ws://100.82.133.125:8765
 - **Process:** Started via `python3 websocket_server.py` (runs in background)
+- **PID:** 2334941
 - **Models:** Whisper tiny + Kokoro TTS loaded and warmed up
 - **Import Test:** ✓ `python3 -c 'import websocket_server'` passes
 
@@ -18,6 +19,14 @@
 2. ✓ Tailscale IP auto-detection working (100.82.133.125)
 3. ✓ Server listening on correct port (8765)
 4. ✓ WebSocket connections accepted
+5. ✓ Ping/Pong heartbeat working
+6. ✓ Start/Stop listening commands processed correctly
+
+### TEST_RESULTS.md Created
+- Location: `/home/tom/software_projects/voice-bridge/TEST_RESULTS.md`
+- WebSocket Import: PASS
+- WebSocket Connection: PASS
+- Android Connection: PENDING (requires physical device)
 
 ### Android APK
 - **Location:** `VoiceBridgeApp/app/build/outputs/apk/debug/app-debug.apk`
@@ -33,6 +42,7 @@
 - Kokoro TTS
 - Real-time audio streaming
 - Interruption handling
+- All control messages (ping, start_listening, stop_listening, interrupt)
 
 ### Client-Side (Android)
 - APK built successfully
@@ -71,7 +81,7 @@ The following requires physical Android device:
 pkill -f websocket_server.py
 
 # Start fresh
-python3 websocket_server.py &
+nohup python3 websocket_server.py > /tmp/websocket_server.log 2>&1 &
 ```
 
 ### To Test Locally (without Android):

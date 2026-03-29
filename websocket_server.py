@@ -140,7 +140,7 @@ class VoiceBridgeWebSocket:
         except Exception as e:
             logger.warning(f"Model warm-up failed: {e}")
 
-    async def handle_client(self, websocket: WebSocketServerProtocol, path: str):
+    async def handle_client(self, websocket):
         """Handle a new WebSocket client connection."""
         client_id = f"{websocket.remote_address[0]}:{websocket.remote_address[1]}"
         logger.info(f"Client connected: {client_id}")

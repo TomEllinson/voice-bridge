@@ -162,18 +162,21 @@ class VoiceBridgeWebSocket:
         self,
         websocket: WebSocketServerProtocol,
         client_id: str,
-        message: bytes
+        message
     ):
         """Process incoming WebSocket message."""
         try:
-            # Parse JSON control messages
-            if isinstance(message, str) or message.startswith(b'{'):
-                data = json.loads(message.decode() if isinstance(message, bytes) else message)
+            # websockets library sends text as str, binary as bytes
+            if isinstance(message, str):
+                # Text message - JSON control message
+                data = json.loads(message)
                 await self._handle_control_message(websocket, client_id, data)
                 return
-
-            # Handle binary audio data
-            await self._handle_audio_data(websocket, client_id, message)
+            elif isinstance(message, bytes):
+                # Binary message - audio data
+                await self._handle_audio_data(websocket, client_id, message)
+            else:
+                logger.warning(f"Unknown message type: {type(message)}")
 
         except Exception as e:
             logger.error(f"Error processing message: {e}")

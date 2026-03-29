@@ -213,9 +213,13 @@ class VoiceBridgeService : Service() {
                             _connectionState.value = ConnectionState.Connected
                             updateNotification("Connected - Listening...")
 
-                            // Start recording if in always-listening mode
-                            if (currentMode == RecordingMode.ALWAYS_LISTENING) {
-                                startRecording(currentMode)
+                            // Delay start recording to ensure WebSocket is fully ready
+                            serviceScope.launch {
+                                delay(500) // Give WebSocket time to stabilize
+                                // Start recording if in always-listening mode
+                                if (currentMode == RecordingMode.ALWAYS_LISTENING) {
+                                    startRecording(currentMode)
+                                }
                             }
                         }
 

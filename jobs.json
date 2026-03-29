@@ -1,0 +1,24 @@
+{
+  "jobs": [
+    {
+      "name": "Voice Bridge",
+      "slug": "voice-bridge",
+      "type": "software",
+      "priority": 1,
+      "status": "active",
+      "phase": "Phase 1: Matrix Audio Baseline",
+      "next_action": "Create Matrix voice message handler: extend OpenClaw Matrix provider to receive voice messages, transcribe with local Whisper, and respond with audio clips using TTS (Kokoro or Piper). Focus on core voice-in/voice-out loop with minimal latency.",
+      "last_updated": "2026-03-25T22:25:00.000000+00:00",
+      "project_dir": "/home/tom/software_projects/voice-bridge",
+      "github_repo": "TomEllinson/voice-bridge",
+      "model": "ollama/kimi-k2.5:cloud",
+      "permissions": "custom",
+      "allowed_tools": "Edit,Write,Read,Glob,Grep,Bash(git:*),Bash(ls:*),Bash(cat:*),Bash(grep:*),Bash(echo:*),Bash(mkdir:*),Bash(cp:*),Bash(mv:*),Bash(rm:*),Bash(touch:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(diff:*),Bash(sort:*),Bash(find:*),Bash(which:*),Bash(python3:*),Bash(pip:*),Bash(venv:*)",
+      "blocked_reason": null,
+      "retry_count": 0,
+      "last_error": null,
+      "phase": "Phase 1 Complete",
+      "next_action": "Phase 1 complete: Core voice-in/voice-out modules created. Next: Test actual transcription with audio file, test TTS synthesis, create integration example, and document usage. Create .env file and test with actual Matrix credentials if available."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Voice Bridge</string>
+    <string name="channel_name">Voice Bridge Service</string>
+    <string name="channel_description">Background voice chat service</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="server_address_hint">Tailscale IP:port</string>
+    <string name="permission_required">Microphone permission is required for voice chat</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="always_listening">Always Listening</string>
+    <string name="push_to_talk">Push to Talk</string>
+</resources>

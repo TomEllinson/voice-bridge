@@ -457,9 +457,11 @@ All research findings have been successfully applied and verified:
 
 ### Blocked Tools
 - `./gradlew assembleDebug` - requires permission approval for execution
-  - Build configuration verified ready
+  - Attempted: 2026-03-28 - Permission denied by execution policy
+  - Build configuration verified ready (minSdk 21, OkHttp 4.11.0, TFLite 2.13.0)
   - All source files ready for compilation
   - APK will output to: `VoiceBridgeApp/app/build/outputs/apk/debug/app-debug.apk`
+  - Workaround: User must run manually with `cd VoiceBridgeApp && ./gradlew assembleDebug`
 
 ### Status
-All research findings successfully applied. Build ready pending execution permission.
+All Phase 3 research findings applied and verified. Build ready pending execution permission. Cannot proceed with APK creation or WebSocket/audio testing until Gradle build completes.

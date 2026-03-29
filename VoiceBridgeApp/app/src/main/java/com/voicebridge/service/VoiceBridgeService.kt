@@ -143,9 +143,9 @@ class VoiceBridgeService : Service() {
     private fun initializeVAD() {
         vad = VoiceActivityDetector(
             sampleRate = SAMPLE_RATE,
-            energyThreshold = 40.0f,
-            minSpeechFrames = 5,
-            silenceFrames = 15
+            energyThreshold = 20.0f,  // Lowered from 40.0f for better sensitivity
+            minSpeechFrames = 3,       // Lowered from 5
+            silenceFrames = 20         // Increased from 15 to avoid cutting off
         )
     }
 
@@ -283,7 +283,8 @@ class VoiceBridgeService : Service() {
         }
 
         // Send start_listening control message to server
-        webSocketManager?.sendMessage("""{"type": "start_listening"}""")
+        val sent = webSocketManager?.sendMessage("""{"type": "start_listening"}""")
+        Log.d(TAG, "Sent start_listening message: $sent")
 
         serviceScope.launch(Dispatchers.IO) {
             try {
@@ -385,7 +386,12 @@ class VoiceBridgeService : Service() {
             byteData[i * 2 + 1] = ((shortData[i].toInt() shr 8) and 0xFF).toByte()
         }
 
-        webSocketManager?.sendAudio(byteData)
+        val sent = webSocketManager?.sendAudio(byteData)
+        if (sent == true) {
+            Log.v(TAG, "Sent audio chunk: ${byteData.size} bytes")
+        } else {
+            Log.w(TAG, "Failed to send audio chunk")
+        }
     }
 
     private fun handleServerMessage(message: String) {

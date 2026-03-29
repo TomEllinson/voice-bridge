@@ -60,16 +60,50 @@ class VoiceBridgeWebSocket:
 
     def __init__(
         self,
-        host: str = "100.64.0.1",  # Tailscale IP only
+        host: str = None,  # Auto-detect Tailscale IP
         port: int = 8765,
         whisper_model: str = "tiny",
         tts_engine: str = "kokoro"
     ):
+        # Auto-detect Tailscale IP if not provided
+        if host is None:
+            host = self._get_tailscale_ip() or "127.0.0.1"
+
         self.host = host
         self.port = port
         self.clients: Set[WebSocketServerProtocol] = set()
         self.sessions: Dict[str, AudioStreamBuffer] = {}
         self.session_manager = SessionManager()
+
+    def _get_tailscale_ip(self) -> Optional[str]:
+        """Auto-detect Tailscale IP address (100.x.x.x range)."""
+        import socket
+        try:
+            # Try to find Tailscale interface
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            # Connect to a public address to get local IP
+            sock.connect(("8.8.8.8", 80))
+            local_ip = sock.getsockname()[0]
+            sock.close()
+
+            # Check if it's in Tailscale range
+            if local_ip.startswith("100."):
+                return local_ip
+
+            # Try to get IP from tailscale0 interface specifically
+            import subprocess
+            result = subprocess.run(
+                ["ip", "addr", "show", "tailscale0"],
+                capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                import re
+                match = re.search(r'inet (100\.\d+\.\d+\.\d+)', result.stdout)
+                if match:
+                    return match.group(1)
+        except Exception:
+            pass
+        return None
 
         # Initialize models
         logger.info(f"Loading Whisper model: {whisper_model}")

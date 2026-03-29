@@ -3,7 +3,11 @@ package com.voicebridge.network
 import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import okhttp3.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener as OkHttpWebSocketListener
 import okio.ByteString
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -16,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class WebSocketManager(
     private val serverAddress: String,
     private val port: Int = 8765,
-    private val listener: WebSocketListener
+    private val listener: WebSocketEventListener
 ) {
     companion object {
         private const val TAG = "WebSocketManager"
@@ -79,7 +83,7 @@ class WebSocketManager(
                 .url("ws://$serverAddress:$port/ws")
                 .build()
 
-            webSocket = client.newWebSocket(request, object : WebSocketListener() {
+            webSocket = client.newWebSocket(request, object : OkHttpWebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
                     Log.d(TAG, "WebSocket connected to $serverAddress:$port")
                     isConnected.set(true)
@@ -197,7 +201,7 @@ class WebSocketManager(
     /**
      * Interface for WebSocket events.
      */
-    interface WebSocketListener {
+    interface WebSocketEventListener {
         fun onConnected()
         fun onDisconnected()
         fun onTextMessage(message: String)

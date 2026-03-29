@@ -1,8 +1,6 @@
 package com.voicebridge.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -375,27 +372,14 @@ fun RecordingControls(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isPushToTalk) {
-                // Push to talk button with press detection
-                var isPressed by remember { mutableStateOf(false) }
-
+                // Push to talk button
                 Button(
                     onClick = {},
                     modifier = Modifier
-                        .size(120.dp)
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = {
-                                    isPressed = true
-                                    if (!isRecording) onStartRecording()
-                                    tryAwaitRelease()
-                                    isPressed = false
-                                    if (isRecording) onStopRecording()
-                                }
-                            )
-                        },
+                        .size(120.dp),
                     shape = RoundedCornerShape(60.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRecording || isPressed)
+                        containerColor = if (isRecording)
                             MaterialTheme.colorScheme.error
                         else
                             MaterialTheme.colorScheme.primary
@@ -411,7 +395,7 @@ fun RecordingControls(
                             modifier = Modifier.size(40.dp)
                         )
                         Text(
-                            if (isRecording) "Recording..." else "Hold to Talk",
+                            if (isRecording) "Tap to Stop" else "Tap to Talk",
                             fontSize = 12.sp
                         )
                     }

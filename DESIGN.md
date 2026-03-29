@@ -1,3 +1,48 @@
+---
+project: voice-bridge
+type: software
+priority: 2
+repo: TomEllinson/voice-bridge
+dir: /home/tom/software_projects/voice-bridge
+branch_prefix: feature
+permissions: unrestricted
+budget:
+  max_session_usd: 10
+  max_daily_minutes: 120
+  max_phase_sessions: 10
+nfr:
+  language: python
+  test_framework: pytest
+  min_test_coverage: 60
+  lint: false
+  ci: false
+phases:
+  - id: integration-testing
+    name: "Integration & Testing"
+    gate: "test -f /home/tom/software_projects/voice-bridge/TEST_RESULTS.md && grep -q 'ALL_TESTS.*PASS' /home/tom/software_projects/voice-bridge/TEST_RESULTS.md"
+    actions:
+      - id: websocket-startup
+        do: "Test WebSocket server startup with auto-detected Tailscale IP"
+        verify: "cd /home/tom/software_projects/voice-bridge && python3 -c 'import websocket_server' && echo OK"
+        model: kimi
+      - id: android-connection
+        do: "Verify WebSocket connection from Android app"
+        verify: "test -f /home/tom/software_projects/voice-bridge/TEST_RESULTS.md && grep -q 'WebSocket.*PASS' /home/tom/software_projects/voice-bridge/TEST_RESULTS.md"
+        model: kimi
+      - id: audio-pipeline
+        do: "Verify audio pipeline: mic → Whisper → OpenClaw → TTS → speaker"
+        verify: "test -f /home/tom/software_projects/voice-bridge/TEST_RESULTS.md && grep -q 'Audio.*PASS' /home/tom/software_projects/voice-bridge/TEST_RESULTS.md"
+        model: kimi
+      - id: latency-check
+        do: "Verify latency under 3 seconds for simple queries"
+        verify: "test -f /home/tom/software_projects/voice-bridge/TEST_RESULTS.md && grep -q 'Latency.*2.*s' /home/tom/software_projects/voice-bridge/TEST_RESULTS.md"
+        model: kimi
+      - id: bluetooth-test
+        do: "Verify Bluetooth headset compatibility"
+        verify: "test -f /home/tom/software_projects/voice-bridge/TEST_RESULTS.md && grep -q 'Bluetooth.*PASS' /home/tom/software_projects/voice-bridge/TEST_RESULTS.md"
+        model: kimi
+---
+
 # Project: Voice Bridge
 
 ## Meta

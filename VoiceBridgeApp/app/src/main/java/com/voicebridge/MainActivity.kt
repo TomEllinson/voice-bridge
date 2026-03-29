@@ -47,9 +47,11 @@ class MainActivity : ComponentActivity() {
     ) { permissions ->
         val allGranted = permissions.entries.all { it.value }
         if (allGranted) {
+            Toast.makeText(this, "Permissions granted - starting service...", Toast.LENGTH_SHORT).show()
             bindToService()
         } else {
-            Toast.makeText(this, "Permissions required for voice features", Toast.LENGTH_LONG).show()
+            val denied = permissions.filter { !it.value }.keys.joinToString(", ")
+            Toast.makeText(this, "Permissions DENIED: $denied", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -88,6 +90,7 @@ class MainActivity : ComponentActivity() {
             permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
         }
 
+        Toast.makeText(this, "Requesting permissions...", Toast.LENGTH_SHORT).show()
         permissionLauncher.launch(permissions.toTypedArray())
     }
 

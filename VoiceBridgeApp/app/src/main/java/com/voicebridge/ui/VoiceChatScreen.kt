@@ -74,6 +74,21 @@ fun VoiceChatScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+            // Service binding status
+            if (!isServiceBound()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Text(
+                        text = "⚠️ Service not bound - waiting for service...",
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             // Connection status card
             ConnectionStatusCard(
                 isConnected = isConnected,

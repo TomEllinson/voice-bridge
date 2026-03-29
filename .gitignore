@@ -52,3 +52,12 @@ models/
 # OS
 .DS_Store
 Thumbs.db
+# Build artifacts and downloads
+commandlinetools.zip
+openjdk-17.tar.gz
+jdk-17.0.14+7/
+android-sdk/
+VoiceBridgeApp/.gradle/
+VoiceBridgeApp/app/build/
+*.apk
+*.aab

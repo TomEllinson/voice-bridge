@@ -75,6 +75,20 @@ class VoiceBridgeWebSocket:
         self.sessions: Dict[str, AudioStreamBuffer] = {}
         self.session_manager = SessionManager()
 
+        # Initialize models - MOVED OUT of _get_tailscale_ip method
+        logger.info(f"Loading Whisper model: {whisper_model}")
+        self.transcriber = WhisperTranscriber(
+            model_size=whisper_model,
+            device="cpu",
+            compute_type="int8"
+        )
+
+        logger.info(f"Loading TTS engine: {tts_engine}")
+        self.tts = SmartTTS(preferred_engine=tts_engine)
+
+        # Pre-warm models
+        self._warm_models()
+
     def _get_tailscale_ip(self) -> Optional[str]:
         """Auto-detect Tailscale IP address (100.x.x.x range)."""
         import socket
@@ -104,20 +118,6 @@ class VoiceBridgeWebSocket:
         except Exception:
             pass
         return None
-
-        # Initialize models
-        logger.info(f"Loading Whisper model: {whisper_model}")
-        self.transcriber = WhisperTranscriber(
-            model_size=whisper_model,
-            device="cpu",
-            compute_type="int8"
-        )
-
-        logger.info(f"Loading TTS engine: {tts_engine}")
-        self.tts = SmartTTS(preferred_engine=tts_engine)
-
-        # Pre-warm models
-        self._warm_models()
 
     def _warm_models(self):
         """Pre-load models to reduce latency."""

@@ -282,6 +282,9 @@ class VoiceBridgeService : Service() {
             RecordingMode.ALWAYS_LISTENING -> ConversationMode.ALWAYS_LISTENING
         }
 
+        // Send start_listening control message to server
+        webSocketManager?.sendMessage("""{"type": "start_listening"}""")
+
         serviceScope.launch(Dispatchers.IO) {
             try {
                 // Start Bluetooth SCO audio if headset is connected

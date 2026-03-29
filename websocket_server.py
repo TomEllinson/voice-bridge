@@ -75,6 +75,20 @@ class VoiceBridgeWebSocket:
         self.sessions: Dict[str, AudioStreamBuffer] = {}
         self.session_manager = SessionManager()
 
+        # Initialize models - MOVED OUT of _get_tailscale_ip method
+        logger.info(f"Loading Whisper model: {whisper_model}")
+        self.transcriber = WhisperTranscriber(
+            model_size=whisper_model,
+            device="cpu",
+            compute_type="int8"
+        )
+
+        logger.info(f"Loading TTS engine: {tts_engine}")
+        self.tts = SmartTTS(preferred_engine=tts_engine)
+
+        # Pre-warm models
+        self._warm_models()
+
     def _get_tailscale_ip(self) -> Optional[str]:
         """Auto-detect Tailscale IP address (100.x.x.x range)."""
         import socket
@@ -105,20 +119,6 @@ class VoiceBridgeWebSocket:
             pass
         return None
 
-        # Initialize models
-        logger.info(f"Loading Whisper model: {whisper_model}")
-        self.transcriber = WhisperTranscriber(
-            model_size=whisper_model,
-            device="cpu",
-            compute_type="int8"
-        )
-
-        logger.info(f"Loading TTS engine: {tts_engine}")
-        self.tts = SmartTTS(preferred_engine=tts_engine)
-
-        # Pre-warm models
-        self._warm_models()
-
     def _warm_models(self):
         """Pre-load models to reduce latency."""
         logger.info("Warming up models...")
@@ -140,7 +140,7 @@ class VoiceBridgeWebSocket:
         except Exception as e:
             logger.warning(f"Model warm-up failed: {e}")
 
-    async def handle_client(self, websocket: WebSocketServerProtocol, path: str):
+    async def handle_client(self, websocket):
         """Handle a new WebSocket client connection."""
         client_id = f"{websocket.remote_address[0]}:{websocket.remote_address[1]}"
         logger.info(f"Client connected: {client_id}")
@@ -162,18 +162,21 @@ class VoiceBridgeWebSocket:
         self,
         websocket: WebSocketServerProtocol,
         client_id: str,
-        message: bytes
+        message
     ):
         """Process incoming WebSocket message."""
         try:
-            # Parse JSON control messages
-            if isinstance(message, str) or message.startswith(b'{'):
-                data = json.loads(message.decode() if isinstance(message, bytes) else message)
+            # websockets library sends text as str, binary as bytes
+            if isinstance(message, str):
+                # Text message - JSON control message
+                data = json.loads(message)
                 await self._handle_control_message(websocket, client_id, data)
                 return
-
-            # Handle binary audio data
-            await self._handle_audio_data(websocket, client_id, message)
+            elif isinstance(message, bytes):
+                # Binary message - audio data
+                await self._handle_audio_data(websocket, client_id, message)
+            else:
+                logger.warning(f"Unknown message type: {type(message)}")
 
         except Exception as e:
             logger.error(f"Error processing message: {e}")

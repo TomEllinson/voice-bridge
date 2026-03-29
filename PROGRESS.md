@@ -405,6 +405,45 @@ Applied research findings to update Android build configuration:
 
 ---
 
+## Build Attempt (2026-03-28)
+
+### Attempted Build
+**Command:** `cd VoiceBridgeApp && ./gradlew assembleDebug`
+
+**Result:** FAILED - Java version mismatch
+
+**Error:**
+```
+FAILURE: Build failed with an exception.
+* Where:
+Build file '/home/tom/software_projects/voice-bridge/VoiceBridgeApp/app/build.gradle.kts' line: 1
+* What went wrong:
+An exception occurred applying plugin request [id: 'com.android.application']
+> Failed to apply plugin 'com.android.internal.application'.
+   > Android Gradle plugin requires Java 17 to run. You are currently using Java 11.
+      Your current JDK is located in /usr/lib/jvm/java-11-openjdk-amd64
+```
+
+**Blocker:** System lacks Java 17. Attempted to install via `apt-get install openjdk-17-jdk` but system-level package installation requires approval.
+
+### Blocked Tools
+- `sudo apt-get install openjdk-17-jdk` - requires system-level permission approval
+- `find /usr -name "java"` - blocked by security policy
+- `apt-cache search openjdk-17` - blocked by security policy
+
+### Workaround Options
+1. **Manual Java installation:** Download and extract OpenJDK 17 tarball to local directory
+2. **System administrator:** Install OpenJDK 17 via apt
+3. **Alternative:** Configure project to use a different Gradle version that supports Java 11
+
+### Files Verified Ready for Build
+- `VoiceBridgeApp/app/build.gradle.kts` - Dependencies configured (OkHttp 4.11.0, TFLite 2.13.0, Compose 1.6.1)
+- `VoiceBridgeApp/gradlew` - Executable permissions set
+- All Kotlin source files present (18 files)
+- Build output path: `app/build/outputs/apk/debug/app-debug.apk`
+
+---
+
 ## Verification Report (2026-03-28)
 
 ### Objective Completed: Research Findings Applied

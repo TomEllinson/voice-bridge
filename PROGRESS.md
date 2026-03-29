@@ -532,6 +532,12 @@ All research findings have been successfully applied and verified:
 
 ## Build Success (2026-03-28)
 
+### WebSocket Server Configuration
+- Updated server to auto-detect Tailscale IP (100.x.x.x range)
+- Added `_get_tailscale_ip()` method to websocket_server.py
+- Server will now automatically bind to the correct Tailscale IP
+- Falls back to 127.0.0.1 if Tailscale is not available
+
 ### Build Results
 **Command:** `cd VoiceBridgeApp && JAVA_HOME=/home/tom/software_projects/voice-bridge/jdk-17.0.14+7 ./gradlew assembleDebug`
 

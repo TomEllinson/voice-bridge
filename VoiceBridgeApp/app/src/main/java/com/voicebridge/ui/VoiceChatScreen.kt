@@ -23,8 +23,19 @@ fun VoiceChatScreen(
     service: () -> VoiceBridgeService?,
     isServiceBound: () -> Boolean
 ) {
-    var serverIp by remember { mutableStateOf("100.64.1.1") }
-    var port by remember { mutableStateOf("8765") }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val prefs = remember { context.getSharedPreferences("voicebridge_prefs", android.content.Context.MODE_PRIVATE) }
+    
+    var serverIp by remember { mutableStateOf(prefs.getString("server_ip", "100.64.1.1") ?: "100.64.1.1") }
+    var port by remember { mutableStateOf(prefs.getString("server_port", "8765") ?: "8765") }
+    
+    // Save IP when it changes
+    LaunchedEffect(serverIp) {
+        prefs.edit().putString("server_ip", serverIp).apply()
+    }
+    LaunchedEffect(port) {
+        prefs.edit().putString("server_port", port).apply()
+    }
     var isConnected by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
     var listeningMode by remember { mutableStateOf(VoiceBridgeService.RecordingMode.ALWAYS_LISTENING) }
